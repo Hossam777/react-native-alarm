@@ -22,42 +22,65 @@ public class RNReactNativeAlarmModule extends ReactContextBaseJavaModule {
   public String getName() {
     return "RNReactNativeAlarm";
   }
+  
   @ReactMethod
-  public void addAlarm(int hour, int minutes, Promise promise){
-      createAlarm(hour, minutes);
-      promise.resolve(true);
-  }
-  @ReactMethod
-  public void addAlarm(int hour, int minutes, String AMorPM, Promise promise){
-      if("pm".equals(AMorPM.toLowerCase())){
-          createAlarm(hour + 12, minutes);
-      }else{
-          createAlarm(hour, minutes);
-      }
-      promise.resolve(true);
-  }
-  @ReactMethod
-  public void addAlarm(String format, Promise promise){
-      ArrayList<String> specialWords = new ArrayList<String>();
-      specialWords.add("after");
-      specialWords.add("in");
-      specialWords.add("for");
-      String[] words = format.split(" ");
-      if(specialWords.contains(words[0].toLowerCase())){
-          if(words.length >= 2){
-              try {
-                  int hours = Integer.parseInt(words[1]);
-                  int newHours = hours + Integer.parseInt(simpleDateFormat.format(Calendar.getInstance().getTime()).substring(0, 2));
-                  newHours = (newHours > 24) ? (newHours - 24):(newHours);
-                  createAlarm(newHours, Integer.parseInt(simpleDateFormat.format(Calendar.getInstance().getTime()).substring(3, 5)));
-              }catch (Exception e){
-                  promise.resolve(false);
-              }
-          }
-      }
-      promise.resolve(true);
-  }
+  public void setAlarm(String[] entities, Promise promise){
+    ArrayList<String> specialWords = new ArrayList<String>();
+    specialWords.add("after");
+    specialWords.add("in");
+    specialWords.add("for");
+    if (isNumeric(entities[0])){
+        if(entities.length > 1 && ("pm".equals(entities[1].toLowerCase()) || "am".equals(entities[1].toLowerCase()))){
+            if("pm".equals(entities[1].toLowerCase()))
+                createAlarm(Integer.parseInt(entities[0]) + 12, 0);
+            else
+                createAlarm(Integer.parseInt(entities[0]), 0);
+        }else{
+            createAlarm(Integer.parseInt(entities[0]), 0);
+        }
+        promise.resolve(true);
+    }else if(isTime(entities[0])){
+        if(entities.length > 1 && "pm".equals(entities[1].toLowerCase()))
+            createAlarm(Integer.parseInt(entities[0].split(":")[0]) + 12, Integer.parseInt(entities[0].split(":")[1]));
+        else
+            createAlarm(Integer.parseInt(entities[0].split(":")[0]), Integer.parseInt(entities[0].split(":")[1]));
+        promise.resolve(true);
+    }else if(specialWords.contains(entities[0].toLowerCase())){
+        try {
+            int hours = Integer.parseInt(entities[1]);
+            int newHours = hours + Integer.parseInt(simpleDateFormat.format(Calendar.getInstance().getTime()).substring(0, 2));
+            newHours = (newHours > 24) ? (newHours - 24):(newHours);
+            createAlarm(newHours, Integer.parseInt(simpleDateFormat.format(Calendar.getInstance().getTime()).substring(3, 5)));
+            promise.resolve(true);
+        }catch (Exception e){
+          promise.resolve(false);
+        }
+    }else{
+      promise.resolve(false);
+    }   
+ }
 
+private boolean isNumeric(String strNum) {
+    if (strNum == null) {
+        return false;
+    }
+    try {
+        double d = Double.parseDouble(strNum);
+    } catch (NumberFormatException nfe) {
+        return false;
+    }
+    return true;
+}
+private boolean isTime(String time) {
+    try {
+        String[] timeParts = time.split(":");
+        Integer hours = Integer.parseInt(timeParts[0]);
+        Integer Minutes = Integer.parseInt(timeParts[1]);
+    }catch (Exception e){
+        return false;
+    }
+    return true;
+}
   public void createAlarm(int hour, int minutes){
       Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM);
       intent.putExtra(AlarmClock.EXTRA_SKIP_UI, true);
