@@ -24,7 +24,8 @@ public class RNReactNativeAlarmModule extends ReactContextBaseJavaModule {
   }
   
   @ReactMethod
-  public void setAlarm(String[] entities, Promise promise){
+  public void setAlarm(String words, Promise promise){
+    String[] entities = words.split(" ");
     ArrayList<String> specialWords = new ArrayList<String>();
     specialWords.add("after");
     specialWords.add("in");
