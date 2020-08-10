@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class RNReactNativeAlarmModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
-
+  SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
   public RNReactNativeAlarmModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
