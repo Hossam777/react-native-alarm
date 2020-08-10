@@ -1,5 +1,5 @@
 
-package com.reactlibrary;
+package com.reactlibrary.alarm;
 
 import java.util.Arrays;
 import java.util.Collections;
